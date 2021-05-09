@@ -2,7 +2,6 @@ package com.api.controllers;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -27,7 +26,7 @@ import com.api.services.CustomerService;
 
 @RestController
 @RequestMapping("/api")
-public class CustomerController extends BaseController{
+public class CustomerController extends BaseController {
 
 	@Autowired
 	private CustomerService customerService;
@@ -43,8 +42,8 @@ public class CustomerController extends BaseController{
 			
 		} catch (Throwable e) {
 			// TODO: handle exception
-			e.printStackTrace();
-			 return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			log.error("ERROR :: "+e.getMessage(),e);
+			throw new UnknowException(e.getMessage());
 		}
 		
 	}
@@ -54,16 +53,16 @@ public class CustomerController extends BaseController{
 	{
 		try 
 		{
-			Optional<Customer> customer = customerService.find(id);
+			Customer customer = customerService.find(id).orElseThrow(() -> new NotExistException("Customer "+ id +"not found"));
 
-			return new ResponseEntity<>(customer.get(),HttpStatus.OK);
+			return new ResponseEntity<>(customer,HttpStatus.OK);
 		} 
 		catch (NoSuchElementException e) {
-			log.error(e.getMessage());
+			log.error("ERROR :: "+e.getMessage(),e);
 			throw new NotExistException(String.format(e.getMessage()));
 		}
 		catch (Throwable e) {
-			log.error(e.getMessage());
+			log.error("ERROR :: "+e.getMessage(),e);
 			throw new UnknowException(String.format(e.getMessage()));
 		}
 		
@@ -76,22 +75,23 @@ public class CustomerController extends BaseController{
 		try 
 		{
 			
-			if (customerService.find(customer.getCustomerNumber()) != null ) 
+			if (customerService.find(customer.getCustomerNumber()) == null ) 
 			{
-				throw new ConflictException("Already exist Customer number");
+				customerService.save(customer);
+				return new ResponseEntity<>(customer,HttpStatus.CREATED);
+
 			}
-			
-			customerService.save(customer);
-			
-			return new ResponseEntity<>(customer,HttpStatus.CREATED);
+			else
+			{
+				throw new ConflictException(customer.getCustomerNumber() +" Already exist");
+			}
 			
 		} 
 		catch (Throwable e) 
 		{
-			log.error(e.getMessage());
+			log.error("ERROR :: "+e.getMessage(),e);
 			throw new UnknowException(e.getMessage());
 		}
-		
 	}
 	
 	
@@ -101,27 +101,16 @@ public class CustomerController extends BaseController{
 		try 
 		{
 			log.debug("Update Customer");
-			Optional<Customer> c_check = customerService.find(id);
+			customerService.find(id).orElseThrow(() -> new NotExistException(id + "Customer not found"));
 
-			
-			if (c_check.get() != null) 
-			{
-				customerService.save(customer);
-				return new ResponseEntity<>(customer,HttpStatus.OK);
-			}
-			
+			customerService.save(customer);
+			return new ResponseEntity<>(customer,HttpStatus.OK);
 		} 
-		catch (NoSuchElementException e)
-		{
-			log.error("ERROR :: "+e.getMessage(),e);
-			throw new NotExistException(String.format("Customer Not found"));
-		}
 		catch (Throwable e)
 		{
 			log.error("ERROR :: "+e.getMessage(),e);
 			throw new UnknowException(e.getMessage());
 		}
-		return null;
 	}
 	
 	@DeleteMapping("customer/{id}")
@@ -130,14 +119,15 @@ public class CustomerController extends BaseController{
 		
 		try 
 		{
-			Optional<Customer> customer = customerService.find(id);
-			
+			Customer customer = customerService.find(id).orElseThrow(() -> new NotExistException(id + "Customer not found"));
 			customerService.delete(customer);
 			return new ResponseEntity<>(HttpStatus.OK);
 			
-		} catch (NoSuchElementException e) {
-			e.printStackTrace();
-			throw new NotExistException(e.getMessage());
+		} 
+		catch (Throwable e)
+		{
+			log.error("ERROR :: "+e.getMessage(),e);
+			throw new UnknowException(e.getMessage());
 		}
 		
 		

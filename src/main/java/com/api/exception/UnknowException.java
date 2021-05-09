@@ -12,6 +12,14 @@ public class UnknowException extends ApiGlobalException {
 	public UnknowException(String message) {
 		super(message);
 	}
+	
+	public UnknowException(Class<?> clazz, long id) {
+        super(String.format("Entity %s with id %d not found", clazz.getSimpleName(), id));
+	}
+ 
+	public UnknowException(Class<?> clazz, String id) {
+	    super(String.format("Entity %s with id %s not found", clazz.getSimpleName(), id));
+	}
 
 	@Override
 	protected HttpStatus getStatus() {

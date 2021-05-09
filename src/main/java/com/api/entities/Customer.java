@@ -33,7 +33,7 @@ public class Customer implements Serializable{
 	@NotNull(message = "customerName is required")
 	private String customerName;
 	
-	@Column(name="contactLastName")
+	@Column(name="contactlastname")
 	@NotNull(message = "contactLastName is required")
 	private String contactLastName;
 	

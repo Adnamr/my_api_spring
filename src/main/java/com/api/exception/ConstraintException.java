@@ -12,6 +12,14 @@ public class ConstraintException extends ApiGlobalException {
 	public ConstraintException(String message) {
 		super(message);
 	}
+	
+	public ConstraintException(Class<?> clazz, long id) {
+        super(String.format("Entity %s with id %d not found", clazz.getSimpleName(), id));
+	}
+ 
+	public ConstraintException(Class<?> clazz, String id) {
+	    super(String.format("Entity %s with id %s not found", clazz.getSimpleName(), id));
+	}
 
 	@Override
 	protected HttpStatus getStatus() {

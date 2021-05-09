@@ -36,8 +36,8 @@ public class CustomerService {
 		return customerRepository.save(customer);
 	}
 	
-	public void delete(Optional<Customer> customer)
+	public void delete(Customer customer)
 	{
-		customerRepository.delete(customer.get());
+		customerRepository.delete(customer);
 	}
 }
